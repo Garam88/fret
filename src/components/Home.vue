@@ -1,0 +1,209 @@
+<template>
+  <div id="home">
+    <div id="controller">
+      <select v-model="selected">
+        <option value="-1">All</option>
+        <option value="0">Ab</option>
+        <option value="1">A</option>
+        <option value="2">Bb</option>
+        <option value="3">B</option>
+        <option value="4">C</option>
+        <option value="5">Db</option>
+        <option value="6">D</option>
+        <option value="7">Eb</option>
+        <option value="8">E</option>
+        <option value="9">F</option>
+        <option value="10">Gb</option>
+        <option value="11">G</option>
+        <option value="12">Hide</option>
+      </select>
+      <div class="type">
+        <input type="radio" id="guitar" value="G" v-model="type">
+        <label for="guitar">Guitar</label>
+        <input type="radio" id="bass" value="B" v-model="type">
+        <label for="bass">Bass</label>
+      </div>
+      <div class="buttons">
+        <div id="test-button" :class="{test: testMode}" @click="test">Test</div>
+      </div>
+      <div class="order">
+        C F Bb Ab Db Gb B E A D G
+      </div>
+    </div>
+    <div id="fingerboard">
+      <div class="string" v-for="string in 6" v-show="type === 'G' || (type === 'B' && string > 2)">
+        <div class="fret" :class="{test: checkTest(string, fret) && testMode}" @click="testClick" v-for="fret in 13">
+          <span class="answer"
+                v-show="checkPitch((stringPitch[string] + fret - 1) % 12) || (checkTest(string, fret) && showAnswer)" >
+            {{pitch[(stringPitch[string] + fret - 1) % 12]}}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div id="guide">
+      <div class="dot-area" v-for="dot in 13">
+        <div v-if="dot > 2 && dot <= 10 && dot%2 === 0" class="dot"></div>
+        <div v-if="dot === 13" class="dot"></div>
+        <div v-if="dot === 13" class="dot"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import {Vue, Component} from 'vue-property-decorator'
+
+@Component
+export default class Home extends Vue{
+  pitch = ['Ab', 'A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G'];
+  stringPitch = [0, 8, 3, 11, 6, 1, 8];
+  selected = "-1";
+  type = "G";
+
+  testMode = false;
+  testString = 0;
+  testFret = 0;
+  timerId = 0
+  showAnswer = false;
+
+  checkPitch(input) {
+    return parseInt(this.selected) === -1 || input === parseInt(this.selected)
+  }
+
+  checkTest(string, fret) {
+    return !this.testMode || (this.testString === string && this.testFret === fret)
+  }
+
+  test () {
+    this.testMode = !this.testMode
+
+    if (this.testMode) {
+      this.selected = 12;
+      this.testString = 0;
+      this.testFret = 0;
+
+      this.timerId = setInterval(() => {
+        this.showAnswer = false;
+        this.testString = parseInt(this.getRandom(this.type === "G" ? 1 : 3, 6));
+        this.testFret = parseInt(this.getRandom(1, 12));
+      }, 5000)
+    } else {
+      this.selected = -1;
+      this.showAnswer = false;
+      clearInterval(this.timerId)
+    }
+  }
+
+  testClick () {
+    if (this.testMode) {
+      this.showAnswer = true;
+    }
+  }
+
+  getRandom(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+#home {
+  #controller {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+
+    select {
+      height: 30px;
+      width: 50px;
+      border-color: gray;
+      border-radius: 3px;
+    }
+
+    .type {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: 20px;
+    }
+
+    .order {
+      margin-left: 30px;
+    }
+
+    #test-button {
+      margin-left: 20px;
+      line-height: 25px;
+      height: 25px;
+      width: 50px;
+      border: solid 1px gray;
+      border-radius: 3px;
+      cursor: pointer;
+
+      &.test {
+        background-color: gray;
+        color: white;
+      }
+    }
+  }
+
+  #fingerboard {
+    display: flex;
+    flex-direction: column;
+    width: 780px;
+    border-bottom: solid 1px black;
+
+    .string {
+      width: 780px;
+      display: flex;
+      flex-direction: row;
+      border-top: solid 1px black;
+
+      .fret {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 59px;
+        height: 30px;
+        border-right: solid 1px black;
+        background-color: wheat;
+
+        &.test {
+          background-color: lightslategray !important;
+          cursor: pointer;
+          color: white;
+          font-weight: bold;
+        }
+
+        &:first-child {
+          width: 58px;
+          border-right-width: 2px;
+          background-color: white;
+        }
+      }
+    }
+  }
+
+  #guide {
+    display: flex;
+    flex-direction: row;
+
+    .dot-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 10px;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        background-color: black;
+        border-radius: 8px;
+      }
+    }
+  }
+}
+</style>
