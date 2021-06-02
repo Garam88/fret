@@ -152,11 +152,11 @@ export default class Home extends Vue{
   #fingerboard {
     display: flex;
     flex-direction: column;
-    width: 780px;
+    width: 650px;
     border-bottom: solid 1px black;
 
     .string {
-      width: 780px;
+      width: 650px;
       display: flex;
       flex-direction: row;
       border-top: solid 1px black;
@@ -165,7 +165,7 @@ export default class Home extends Vue{
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 59px;
+        width: 49px;
         height: 30px;
         border-right: solid 1px black;
         background-color: wheat;
@@ -178,7 +178,7 @@ export default class Home extends Vue{
         }
 
         &:first-child {
-          width: 58px;
+          width: 48px;
           border-right-width: 2px;
           background-color: white;
         }
@@ -194,7 +194,7 @@ export default class Home extends Vue{
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 60px;
+      width: 50px;
       height: 10px;
 
       .dot {
