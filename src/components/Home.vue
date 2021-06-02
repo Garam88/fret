@@ -130,7 +130,7 @@ export default class Home extends Vue{
     }
 
     .order {
-      width: 205px;
+      width: 235px;
       margin-left: 30px;
     }
 
