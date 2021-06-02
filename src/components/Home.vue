@@ -27,7 +27,7 @@
         <div id="test-button" :class="{test: testMode}" @click="test">Test</div>
       </div>
       <div class="order">
-        C F Bb Ab Db Gb B E A D G
+        C F Bb Eb Ab Db Gb B E A D G
       </div>
     </div>
     <div id="fingerboard">
@@ -130,6 +130,7 @@ export default class Home extends Vue{
     }
 
     .order {
+      width: 205px;
       margin-left: 30px;
     }
 
