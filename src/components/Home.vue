@@ -1,7 +1,7 @@
 <template>
   <div id="home">
     <div id="controller">
-      <select v-model="selected">
+      <select v-model="selectedPitch">
         <option value="-1">All</option>
         <option value="0">Ab</option>
         <option value="1">A</option>
@@ -15,7 +15,6 @@
         <option value="9">F</option>
         <option value="10">Gb</option>
         <option value="11">G</option>
-        <option value="12">Hide</option>
       </select>
       <div class="type">
         <input type="radio" id="guitar" value="G" v-model="type">
@@ -31,10 +30,13 @@
       </div>
     </div>
     <div id="fingerboard">
-      <div class="string" v-for="string in 6" v-show="type === 'G' || (type === 'B' && string > 2)">
-        <div class="fret" :class="{test: checkTest(string, fret) && testMode}" @click="testClick" v-for="fret in 13">
+      <div class="string"
+           :class="{select: selectedString === string}"
+           v-for="string in 6" v-show="type === 'G' || (type === 'B' && string > 2)"
+           @click="selectString(string)">
+        <div class="fret" :class="{test: checkTest(string, fret) && testMode, select: checkPitch((stringPitch[string] + fret - 1) % 12)}" @click="testClick" v-for="fret in 13">
           <span class="answer"
-                v-show="checkPitch((stringPitch[string] + fret - 1) % 12) || (checkTest(string, fret) && showAnswer)" >
+                v-show="(checkTest(string, fret) && showAnswer) || !testMode" >
             {{pitch[(stringPitch[string] + fret - 1) % 12]}}
           </span>
         </div>
@@ -57,17 +59,23 @@ import {Vue, Component} from 'vue-property-decorator'
 export default class Home extends Vue{
   pitch = ['Ab', 'A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G'];
   stringPitch = [0, 8, 3, 11, 6, 1, 8];
-  selected = "-1";
+  selectedPitch = "-1";
+  selectedString = 0;
   type = "G";
 
   testMode = false;
   testString = 0;
   testFret = 0;
-  timerId = 0
+  timerId = 0;
   showAnswer = false;
 
+  selectString(input) {
+    if (this.testMode) return;
+    this.selectedString = this.selectedString === input ? 0 : input;
+  }
+
   checkPitch(input) {
-    return parseInt(this.selected) === -1 || input === parseInt(this.selected)
+    return input === parseInt(this.selectedPitch)
   }
 
   checkTest(string, fret) {
@@ -75,20 +83,18 @@ export default class Home extends Vue{
   }
 
   test () {
-    this.testMode = !this.testMode
+    this.testMode = !this.testMode;
 
     if (this.testMode) {
-      this.selected = 12;
       this.testString = 0;
       this.testFret = 0;
 
       this.timerId = setInterval(() => {
         this.showAnswer = false;
-        this.testString = parseInt(this.getRandom(this.type === "G" ? 1 : 3, 6));
+        this.testString = parseInt(this.selectedString !== 0 ? this.selectedString : this.getRandom(this.type === "G" ? 1 : 3, 6));
         this.testFret = parseInt(this.getRandom(1, 12));
       }, 5000)
     } else {
-      this.selected = -1;
       this.showAnswer = false;
       clearInterval(this.timerId)
     }
@@ -162,6 +168,10 @@ export default class Home extends Vue{
       flex-direction: row;
       border-top: solid 1px black;
 
+      &.select {
+        font-weight: bold;
+      }
+
       .fret {
         display: flex;
         align-items: center;
@@ -176,6 +186,10 @@ export default class Home extends Vue{
           cursor: pointer;
           color: white;
           font-weight: bold;
+        }
+
+        &.select {
+          background-color: gold !important;
         }
 
         &:first-child {
