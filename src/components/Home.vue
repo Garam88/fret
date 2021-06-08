@@ -2,7 +2,7 @@
   <div id="home">
     <div id="controller">
       <select v-model="selectedPitch">
-        <option value="-1">All</option>
+        <option value="-1">N</option>
         <option value="0">Ab</option>
         <option value="1">A</option>
         <option value="2">Bb</option>
@@ -22,11 +22,14 @@
         <input type="radio" id="bass" value="B" v-model="type">
         <label for="bass">Bass</label>
       </div>
+      <span class="label">시험 간격(초)</span>
+      <select v-model="testInterval" :disabled="testMode">
+        <option value="1">1</option>
+        <option value="3">3</option>
+        <option value="5">5</option>
+      </select>
       <div class="buttons">
         <div id="test-button" :class="{test: testMode}" @click="test">Test</div>
-      </div>
-      <div class="order">
-        C F Bb Eb Ab Db Gb B E A D G
       </div>
     </div>
     <div id="fingerboard">
@@ -66,7 +69,9 @@ export default class Home extends Vue{
   testMode = false;
   testString = 0;
   testFret = 0;
+  recentFret = new Queue();
   timerId = 0;
+  testInterval = "3";
   showAnswer = false;
 
   selectString(input) {
@@ -88,16 +93,21 @@ export default class Home extends Vue{
     if (this.testMode) {
       this.testString = 0;
       this.testFret = 0;
+      this.doTest();
 
       this.timerId = setInterval(() => {
-        this.showAnswer = false;
-        this.testString = parseInt(this.selectedString !== 0 ? this.selectedString : this.getRandom(this.type === "G" ? 1 : 3, 6));
-        this.testFret = parseInt(this.getRandom(1, 12));
-      }, 5000)
+        this.doTest();
+      }, parseInt(this.testInterval) * 1000)
     } else {
       this.showAnswer = false;
       clearInterval(this.timerId)
     }
+  }
+
+  doTest () {
+    this.showAnswer = false;
+    this.testString = parseInt(this.selectedString !== 0 ? this.selectedString : this.getRandom(this.type === "G" ? 1 : 3, 7));
+    this.testFret = this.getTestFret();
   }
 
   testClick () {
@@ -108,6 +118,46 @@ export default class Home extends Vue{
 
   getRandom(min, max) {
     return Math.random() * (max - min) + min;
+  }
+
+  getTestFret() {
+    let num;
+
+    if(this.recentFret.size() > 5) {
+      this.recentFret.dequeue();
+    }
+
+    while (true) {
+      num = parseInt(this.getRandom(1, 13));
+      if (!this.recentFret.include(num)) {
+        this.recentFret.enqueue(num);
+        break;
+      }
+    }
+
+    this.recentFret.monitor();
+    return num;
+  }
+}
+
+class Queue {
+  constructor() {
+    this._arr = [];
+  }
+  enqueue(item) {
+    this._arr.push(item);
+  }
+  dequeue() {
+    return this._arr.shift();
+  }
+  include(value) {
+    return this._arr.includes(value);
+  }
+  size() {
+    return this._arr.length;
+  }
+  monitor() {
+    console.log(this._arr);
   }
 }
 </script>
@@ -135,15 +185,15 @@ export default class Home extends Vue{
       margin-left: 20px;
     }
 
-    .order {
-      width: 235px;
+    .label {
       margin-left: 30px;
+      margin-right: 10px;
     }
 
     #test-button {
       margin-left: 20px;
-      line-height: 25px;
-      height: 25px;
+      line-height: 28px;
+      height: 28px;
       width: 50px;
       border: solid 1px gray;
       border-radius: 3px;
