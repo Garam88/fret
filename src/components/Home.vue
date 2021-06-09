@@ -170,7 +170,7 @@ class Queue {
     flex-direction: row;
     align-items: center;
     height: 50px;
-    width: 790px;
+    width: 650px;
 
     select {
       height: 30px;
